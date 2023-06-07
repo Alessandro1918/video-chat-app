@@ -1,3 +1,5 @@
+//V1 - Understand app / http / io hierarchy before change from 'js' to 'ts'
+
 const express = require('express');
 const httpServer = require('http')
 const cors = require('cors');
