@@ -2,6 +2,7 @@ import express from "express"
 import { createServer } from "http"
 import { Server, Socket } from "socket.io"
 import { v4 as uuidv4 } from "uuid"
+import "dotenv/config"
 
 const PORT = process.env.PORT || 4000
 const URL_FRONT = process.env.URL_FRONT || "http://localhost:3000"
