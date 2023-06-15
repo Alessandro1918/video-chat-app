@@ -44,6 +44,20 @@ io.on("connection", (socket: Socket) => {
     // socket.broadcast.emit("new-user-joined-app", socket.id)
     //Broadcast to everyone on that ROOM, except the sender:
     socket.broadcast.to(roomId).emit("new-user-joined-room", socket.id)
+
+    //List of other users in the room. Send this back to the sender:
+    let users:string[] = []
+    io.in(roomId).fetchSockets().then(sockets => {
+      sockets.map(s => {
+        if (socket.id != s.id) {
+          users.push(s.id)
+        }
+      })
+      console.log(`Room ${roomId} has now ${users.length + 1} users`)
+      if (users.length > 0) {
+        io.to(socket.id).emit("list-room-users", users)
+      }
+    })
   });
 
   socket.on("send-message-to-room", (roomId, userId, message) => {
