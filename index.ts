@@ -60,6 +60,16 @@ io.on("connection", (socket: Socket) => {
     })
   });
 
+  //New user is initiating it's stream
+  socket.on("send-signal", payload => {
+    io.to(payload.receiverId).emit("new-signal-available", {signal: payload.signal, callerId: payload.callerId})
+  })
+  
+  //Old user is responding with it's own stream
+  socket.on("return-signal", payload => {
+    io.to(payload.callerId).emit("return-signal-available", {signal: payload.signal, id: socket.id})
+  })
+
   socket.on("send-message-to-room", (roomId, userId, message) => {
     //Broadcast to everyone on that room, including the sender:
     io.to(roomId).emit("new-message-to-room", userId, message)
