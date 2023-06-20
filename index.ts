@@ -46,17 +46,17 @@ io.on("connection", (socket: Socket) => {
     socket.broadcast.to(roomId).emit("new-user-joined-room", socket.id)
 
     //List of other users in the room. Send this back to the sender:
-    let users:string[] = []
     io.in(roomId).fetchSockets().then(sockets => {
+      let users:string[] = []
       sockets.map(s => {
         if (socket.id != s.id) {
           users.push(s.id)
         }
       })
-      console.log(`Room ${roomId} has now ${users.length + 1} users`)
       if (users.length > 0) {
         io.to(socket.id).emit("list-room-users", users)
       }
+      console.log(`+ Room ${roomId} has now ${users.length + 1} users`)
     })
   });
 
@@ -80,9 +80,20 @@ io.on("connection", (socket: Socket) => {
     
     //Tell everyone else in the room that a user just left:
     const rooms = socket.rooms
-    if (rooms.size > 0) {
+    if (rooms.size > 1) { //each socket has 2 rooms: it's own room (userId), and the meeting room (roomId)
       for (let room of rooms) {
-        socket.broadcast.to(room).emit("left-room", socket.id)
+        if (room !== socket.id) {
+          socket.broadcast.to(room).emit("left-room", socket.id)
+          io.in(room).fetchSockets().then(sockets => {
+            let users:string[] = []
+            sockets.map(s => {
+              if (socket.id != s.id) {
+                users.push(s.id)
+              }
+            })
+            console.log(`- Room ${room} has now ${users.length} users`)
+          })
+        }
       }
     }
   })
