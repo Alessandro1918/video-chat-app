@@ -2,6 +2,7 @@ import express from "express"
 import { createServer } from "http"
 import { Server, Socket } from "socket.io"
 import { v4 as uuidv4 } from "uuid"
+import cors from "cors"
 import "dotenv/config"
 
 const PORT = process.env.PORT || 4000
@@ -9,18 +10,29 @@ const URL_FRONT = process.env.URL_FRONT || "http://localhost:3000"
 
 const app = express()
 
-//This routes are for server-side rendering only, and can't redirect to pages on a React app
+app.use(cors({
+  origin: URL_FRONT
+}))
+
 app.get("/", (req, res) => {
   res.send(`<h1>Hello, World!</h1>`)
 })
 
 app.get("/new-room", (req, res) => {
-  res.redirect(`/${uuidv4()}`);
+  // res.redirect(`/${uuidv4()}`)   //This routes are for server-side rendering only, and can't redirect to pages on a React app
+  res.json({roomId: uuidv4()})      //Returns a unique Room ID
+
+  //Front usage:
+  // const URL_BACK = process.env.NEXT_PUBLIC_URL_BACK || "http://localhost:4000"
+  // const response = await fetch(`${URL_BACK}/new-room`)
+  // const data = await response.json()
+  // const roomId = data.roomId
+  // console.log(roomId)
 })
 
-app.get("/:room", (req, res) => {
-  res.send(`<h1>Room: ${req.params.room}</h1>`)  //res.render("room", { roomId: req.params.room })
-})
+// app.get("/:room", (req, res) => {
+//   res.send(`<h1>Room: ${req.params.room}</h1>`)  //res.render("room", { roomId: req.params.room })
+// })
 
 const http = createServer(app)
 const io = new Server(http, {
